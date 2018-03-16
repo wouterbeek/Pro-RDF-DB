@@ -1,0 +1,4 @@
+#+TITLE: Pro-RDF-DB
+#+AUTHOR: Wouter Beek
+
+Prolog-based in-memory RDF database.
