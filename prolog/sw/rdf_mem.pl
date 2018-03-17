@@ -26,6 +26,7 @@
      rdf_unload_graph/1 as rdf_retract_graph
    ]).
 :- use_module(library(sgml)).
+:- use_module(library(yall)).
 :- use_module(library(zlib)).
 
 :- use_module(library(sw/rdf_term)).
@@ -60,6 +61,25 @@ rdf_assert_object_(Compound, literal(type(D,Lex))) :-
   xsd_date_time_term_(Compound), !,
   xsd_time_string(Compound, D, String),
   atom_string(Lex, String).
+% nonneg/1 → xsd:nonNegativeInteger
+rdf_assert_object_(nonneg(N), literal(type(D,Lex))) :- !,
+  rdf_equal(D, xsd:nonNegativeInteger),
+  must_be(nonneg, N),
+  xsd_number_string(N, Lex).
+% positive_integer/1 → xsd:positiveInteger
+rdf_assert_object_(positive_integer(N), literal(type(D,Lex))) :- !,
+  rdf_equal(D, xsd:positiveInteger),
+  must_be(positive_integer, N),
+  xsd_number_string(N, Lex).
+% str/1 → xsd:string
+rdf_assert_object_(str(Atomic), literal(type(D,Lex))) :- !,
+  atom_string(Atomic, String),
+  rdf_equal(D, xsd:string),
+  atom_string(Lex, String).
+% year/1 → xsd:gYear
+rdf_assert_object_(year(Year), literal(type(D,Lex))) :- !,
+  rdf_equal(D, xsd:gYear),
+  atom_number(Lex, Year).
 % integer → xsd:integer
 rdf_assert_object_(Value, literal(type(D,Lex))) :-
   integer(Value), !,
