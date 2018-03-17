@@ -29,6 +29,8 @@
 :- use_module(library(yall)).
 :- use_module(library(zlib)).
 
+:- use_module(library(file_ext)).
+:- use_module(library(sw/rdf_guess)).
 :- use_module(library(sw/rdf_term)).
 
 :- rdf_meta
@@ -126,48 +128,32 @@ rdf_list_member(X, L, G) :-
 %! rdf_load_file(+File:atom, +Options:list(compound)) is det.
 %
 % Loads RDF from a local file.  The format is determined based on the
-% file extension of File.  The RDF serialization format can be
-% overruled with the option format/1.
+% file extension of File.
 
 rdf_load_file(File) :-
   rdf_load_file(File, []).
 
 
 rdf_load_file(File, Options) :-
-  file_name_extension(Base, gz, File), !,
-  guess_format_from_file(Base, Format, Options),
-  setup_call_cleanup(
-    gzopen(File, read, In),
-    rdf_load_stream(In, Format, Options),
-    close(In)
-  ).
-rdf_load_file(File, Options) :-
-  guess_format_from_file(File, Format, Options),
-  setup_call_cleanup(
-    open(File, read, In),
-    rdf_load_stream(In, Format, Options),
-    close(In)
+  rdf_guess_name(File, MediaType),
+  call_stream_file(
+    File,
+    {MediaType,Options}/[In]>>rdf_load_stream(In, MediaType, Options)
   ).
 
-guess_format_from_file(_, Format, Options) :-
-  option(format(Ext), Options),
-  rdf_format_extension_(Format, Ext), !.
-guess_format_from_file(File, Format, _) :-
-  file_name_extension(_, Ext, File),
-  rdf_format_extension_(Format, Ext), !.
-guess_format_from_file(File, _, _) :-
-  print_message(warning, unknown_rdf_format(File)).
-
-rdf_load_stream(In, Format, Options1) :-
+rdf_load_stream(In, MediaType, Options1) :-
+  rdf_media_type_format_(MediaType, Format), !,
   merge_options([anon_prefix('_:'),format(Format)], Options1, Options2),
   rdf_db:rdf_load(In, Options2).
+rdf_load_stream(_, MediaType, _) :-
+  existence_error(rdf_media_type, MediaType).
 
-rdf_format_extension_(nquads, nq).
-rdf_format_extension_(ntriples, nt).
-rdf_format_extension_(rdf, html).
-rdf_format_extension_(trig, trig).
-rdf_format_extension_(turtle, ttl).
-rdf_format_extension_(xml, rdf).
+rdf_media_type_format_(media(application/'n-quads',[]), nquads).
+rdf_media_type_format_(media(application/'n-triples',[]), ntriples).
+rdf_media_type_format_(media(text/html,[]), rdfa).
+rdf_media_type_format_(media(application/trig,[]), trig).
+rdf_media_type_format_(media(text/turtle,[]), turtle).
+rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
 
 
 
