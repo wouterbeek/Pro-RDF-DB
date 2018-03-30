@@ -5,6 +5,7 @@
     rdf_list_member/3,        % ?X, ?L, ?G
     rdf_load_file/1,          % +File
     rdf_load_file/2,          % +File, +Options
+    rdf_triple/3,             % ?S, ?P, ?O
     rdf_triple/4,             % ?S, ?P, ?O, ?G
     rdf_triple_list_member/4, % ?S, ?P, ?X, ?G
    %rdf_retract_graph/1,      % ?G
@@ -22,6 +23,7 @@
 
 :- use_module(library(error)).
 :- reexport(library(semweb/rdf_db), [
+     rdf/3 as rdf_triple,
      rdf_retractall/4 as rdf_retract_triples,
      rdf_unload_graph/1 as rdf_retract_graph
    ]).
