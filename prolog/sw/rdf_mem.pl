@@ -7,7 +7,7 @@
     rdf_load_file/2,          % +File, +Options
    %rdf_retract_graph/1,      % ?G
    %rdf_retractall_triples/4, % ?S, ?P, ?O, ?G
-    rdf_triple/3,             % ?S, ?P, ?O
+   %rdf_triple/3,             % ?S, ?P, ?O
     rdf_triple/4,             % ?S, ?P, ?O, ?G
     rdf_triple_list_member/4, % ?S, ?P, ?X, ?G
     rdf_update/4,             % ?S, ?P, ?O, +Action
@@ -280,4 +280,6 @@ rdf_update(S1, P, O, G, subject(S2)) :- !,
     )
   ).
 
-rdf_update_language_tagged_string(literal(lang(_,Lex)), LTag, literal(lang(LTag,Lex))).
+rdf_update_language_tagged_string(literal(lang(_,Lex)), LTag, literal(lang(LTag,Lex))) :- !.
+rdf_update_language_tagged_string(literal(type(D,Lex)), LTag, literal(lang(LTag,Lex))) :-
+  rdf_equal(D, xsd:string).
