@@ -5,11 +5,11 @@
     rdf_list_member/3,        % ?X, ?L, ?G
     rdf_load_file/1,          % +File
     rdf_load_file/2,          % +File, +Options
+   %rdf_retract_graph/1,      % ?G
+   %rdf_retractall_triples/4, % ?S, ?P, ?O, ?G
     rdf_triple/3,             % ?S, ?P, ?O
     rdf_triple/4,             % ?S, ?P, ?O, ?G
     rdf_triple_list_member/4, % ?S, ?P, ?X, ?G
-   %rdf_retract_graph/1,      % ?G
-   %rdf_retract_triples/4,    % ?S, ?P, ?O, ?G
     rdf_update/4,             % ?S, ?P, ?O, +Action
     rdf_update/5              % ?S, ?P, ?O, ?G, +Action
   ]
@@ -24,20 +24,31 @@
 :- use_module(library(error)).
 :- reexport(library(semweb/rdf_db), [
      rdf/3 as rdf_triple,
-     rdf_retractall/4 as rdf_retract_triples,
+     rdf_retractall/4 as rdf_retractall_triples,
      rdf_unload_graph/1 as rdf_retract_graph
    ]).
+:- use_module(library(semweb/rdf_ntriples), []).
+:- use_module(library(semweb/rdfa), []).
+:- use_module(library(semweb/turtle), []).
 :- use_module(library(sgml)).
 :- use_module(library(yall)).
 :- use_module(library(zlib)).
 
 :- use_module(library(file_ext)).
-:- use_module(library(sw/rdf_guess)).
+:- use_module(library(sw/rdf_media_type)).
 :- use_module(library(sw/rdf_term)).
+
+:- dynamic
+    rdf_mem:rdf_assert_object_hook/2.
+
+:- multifile
+    rdf_mem:rdf_assert_object_hook/2.
 
 :- rdf_meta
    rdf_assert_triple(r, r, o, r),
    rdf_list_member(o, r, r),
+   rdf_retract_graph(r),
+   rdf_retractall_triples(r, r, o, r),
    rdf_triple(r, r, o, r),
    rdf_triple_list_member(r, r, o, r),
    rdf_update(r, r, o, t),
@@ -53,13 +64,16 @@ rdf_assert_triple(S, P, O1, G) :-
   rdf_assert_object_(O1, O2),
   rdf_db:rdf_assert(S, P, O2, G).
 
-rdf_assert_object_(O) :-
-  var(O), !,
-  instantiation_error(O).
+rdf_assert_object_(Term, _) :-
+  var(Term), !,
+  instantiation_error(Term).
+% hook
+rdf_assert_object_(Term, O) :-
+  rdf_mem:rdf_assert_object_hook(Term, O), !.
 % language-tagged string
 rdf_assert_object_(String-LTag, literal(lang(LTag,Lex))) :- !,
   atom_string(Lex, String).
-% @tbd Support a more convenient/unifor date/time input format.
+% @tbd Support a more convenient/uniform date/time input format.
 % date/3, date_time/[6.7], month_day/2, time/3, year_month/2
 rdf_assert_object_(Compound, literal(type(D,Lex))) :-
   xsd_date_time_term_(Compound), !,
@@ -80,6 +94,9 @@ rdf_assert_object_(str(Atomic), literal(type(D,Lex))) :- !,
   atom_string(Atomic, String),
   rdf_equal(D, xsd:string),
   atom_string(Lex, String).
+% uri/1 → xsd:anyURI
+rdf_assert_object_(uri(Uri), literal(type(D,Uri))) :- !,
+  rdf_equal(xsd:anyURI, D).
 % year/1 → xsd:gYear
 rdf_assert_object_(year(Year), literal(type(D,Lex))) :- !,
   rdf_equal(D, xsd:gYear),
@@ -104,6 +121,10 @@ rdf_assert_object_(Value, literal(type(D,Lex))) :-
 rdf_assert_object_(literal(type(D,Lex)), literal(type(D,Lex))) :- !.
 % regular language-tagged string
 rdf_assert_object_(literal(lang(LTag,Lex)), literal(lang(LTag,Lex))) :- !.
+% atom `false' and `true' → xsd:boolean
+rdf_assert_object_(Lex, literal(type(D,Lex))) :-
+  memberchk(Lex, [false,true]), !,
+  rdf_equal(D, xsd:boolean).
 % blank node, IRI
 rdf_assert_object_(O, O).
 
@@ -137,7 +158,7 @@ rdf_load_file(File) :-
 
 
 rdf_load_file(File, Options) :-
-  rdf_guess_name(File, MediaType),
+  rdf_file_name_media_type(File, MediaType),
   call_stream_file(
     File,
     {MediaType,Options}/[In]>>rdf_load_stream(In, MediaType, Options)
@@ -212,7 +233,7 @@ rdf_update(S, P, O1, G, datatype(D)) :- !,
     rdf_triple(S, P, O1, G),
     (
       rdf_literal_lexical_form(O1, Lex),
-      rdf_retract_triples(S, P, O1, G),
+      rdf_retractall_triples(S, P, O1, G),
       rdf_literal(D, _, Lex, O2),
       rdf_assert_triple(S, P, O2, G)
     )
@@ -221,7 +242,7 @@ rdf_update(S, P, O, G1, graph(G2)) :- !,
   forall(
     rdf_triple(S, P, O, G1),
     (
-      rdf_retract_triples(S, P, O, G1),
+      rdf_retractall_triples(S, P, O, G1),
       rdf_assert_triple(S, P, O, G2)
     )
   ).
@@ -230,7 +251,7 @@ rdf_update(S, P, O1, G, ltag(LTag)) :- !,
     rdf_triple(S, P, O1, G),
     (
       rdf_update_language_tagged_string(O1, LTag, O2),
-      rdf_retract_triples(S, P, O1, G),
+      rdf_retractall_triples(S, P, O1, G),
       rdf_assert_triple(S, P, O2, G)
     )
   ).
@@ -238,7 +259,7 @@ rdf_update(S, P, O1, G, object(O2)) :- !,
   forall(
     rdf_triple(S, P, O1, G),
     (
-      rdf_retract_triples(S, P, O1, G),
+      rdf_retractall_triples(S, P, O1, G),
       rdf_assert_triple(S, P, O2, G)
     )
   ).
@@ -246,7 +267,7 @@ rdf_update(S, P1, O, G, predicate(P2)) :- !,
   forall(
     rdf_triple(S, P1, O, G),
     (
-      rdf_retract_triples(S, P1, O, G),
+      rdf_retractall_triples(S, P1, O, G),
       rdf_assert_triple(S, P2, O, G)
     )
   ).
@@ -254,7 +275,7 @@ rdf_update(S1, P, O, G, subject(S2)) :- !,
   forall(
     rdf_triple(S1, P, O, G),
     (
-      rdf_retract_triples(S1, P, O, G),
+      rdf_retractall_triples(S1, P, O, G),
       rdf_assert_triple(S2, P, O, G)
     )
   ).
