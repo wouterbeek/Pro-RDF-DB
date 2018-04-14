@@ -5,6 +5,7 @@
     rdf_list_member/3,        % ?X, ?L, ?G
     rdf_load_file/1,          % +File
     rdf_load_file/2,          % +File, +Options
+   %rdf_predicate/1,          % ?P
    %rdf_retract_graph/1,      % ?G
    %rdf_retractall_triples/4, % ?S, ?P, ?O, ?G
    %rdf_triple/3,             % ?S, ?P, ?O
@@ -26,6 +27,9 @@
      rdf/3 as rdf_triple,
      rdf_retractall/4 as rdf_retractall_triples,
      rdf_unload_graph/1 as rdf_retract_graph
+   ]).
+:- reexport(library(semweb/rdf11), [
+     rdf_predicate/1
    ]).
 :- use_module(library(semweb/rdf_ntriples), []).
 :- use_module(library(semweb/rdfa), []).
