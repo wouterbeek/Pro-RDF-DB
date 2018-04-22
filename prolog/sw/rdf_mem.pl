@@ -1,6 +1,8 @@
 :- module(
   rdf_mem,
   [
+    rdf_assert_triple/1,      % +Triple
+    rdf_assert_triple/3,      % +S, +P, +O
     rdf_assert_triple/4,      % +S, +P, +O, +G
     rdf_list_member/3,        % ?X, ?L, ?G
     rdf_load_file/1,          % +File
@@ -49,6 +51,8 @@
     rdf_mem:rdf_assert_object_hook/2.
 
 :- rdf_meta
+   rdf_assert_triple(t),
+   rdf_assert_triple(r, r, o),
    rdf_assert_triple(r, r, o, r),
    rdf_list_member(o, r, r),
    rdf_retract_graph(r),
@@ -62,7 +66,18 @@
 
 
 
+%! rdf_assert_triple(+Triple:rdf_triple) is det.
+%! rdf_assert_triple(+S:rdf_subject, +P:rdf_prefix, +O:rdf_object) is det.
 %! rdf_assert_triple(+S:rdf_subject, +P:rdf_prefix, +O:rdf_object, +G:rdf_graph) is det.
+
+rdf_assert_triple(rdf(S,P,O)) :-
+  rdf_assert_triple(S, P, O).
+
+
+rdf_assert_triple(S, P, O1) :-
+  rdf_assert_object_(O1, O2),
+  rdf_db:rdf_assert(S, P, O2).
+
 
 rdf_assert_triple(S, P, O1, G) :-
   rdf_assert_object_(O1, O2),
