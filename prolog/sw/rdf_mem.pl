@@ -10,6 +10,7 @@
    %rdf_predicate/1,          % ?P
    %rdf_retract_graph/1,      % ?G
    %rdf_retractall_triples/4, % ?S, ?P, ?O, ?G
+    rdf_triple/1,             % ?Triple
    %rdf_triple/3,             % ?S, ?P, ?O
     rdf_triple/4,             % ?S, ?P, ?O, ?G
     rdf_triple_list_member/4, % ?S, ?P, ?X, ?G
@@ -57,6 +58,7 @@
    rdf_list_member(o, r, r),
    rdf_retract_graph(r),
    rdf_retractall_triples(r, r, o, r),
+   rdf_triple(t),
    rdf_triple(r, r, o, r),
    rdf_triple_list_member(r, r, o, r),
    rdf_update(r, r, o, t),
@@ -196,6 +198,13 @@ rdf_media_type_format_(media(text/html,[]), rdfa).
 rdf_media_type_format_(media(application/trig,[]), trig).
 rdf_media_type_format_(media(text/turtle,[]), turtle).
 rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
+
+
+
+%! rdf_triple(?Triple:compound) is nondet.
+
+rdf_triple(rdf(S,P,O)) :-
+  rdf_triple(S, P, O).
 
 
 
