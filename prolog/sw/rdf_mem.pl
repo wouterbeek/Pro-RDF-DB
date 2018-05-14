@@ -1,21 +1,22 @@
 :- module(
   rdf_mem,
   [
-    rdf_assert_triple/1,      % +Triple
-    rdf_assert_triple/3,      % +S, +P, +O
-    rdf_assert_triple/4,      % +S, +P, +O, +G
-    rdf_list_member/3,        % ?X, ?L, ?G
-    rdf_load_file/1,          % +File
-    rdf_load_file/2,          % +File, +Options
-   %rdf_predicate/1,          % ?P
-   %rdf_retract_graph/1,      % ?G
-   %rdf_retractall_triples/4, % ?S, ?P, ?O, ?G
-    rdf_triple/1,             % ?Triple
-   %rdf_triple/3,             % ?S, ?P, ?O
-    rdf_triple/4,             % ?S, ?P, ?O, ?G
-    rdf_triple_list_member/4, % ?S, ?P, ?X, ?G
-    rdf_update/4,             % ?S, ?P, ?O, +Action
-    rdf_update/5              % ?S, ?P, ?O, ?G, +Action
+    rdf_assert_triple/1,                 % +Triple
+    rdf_assert_triple/3,                 % +S, +P, +O
+    rdf_assert_triple/4,                 % +S, +P, +O, +G
+    rdf_container_membership_property/1, % ?P
+    rdf_list_member/3,                   % ?X, ?L, ?G
+    rdf_load_file/1,                     % +File
+    rdf_load_file/2,                     % +File, +Options
+   %rdf_predicate/1,                     % ?P
+   %rdf_retract_graph/1,                 % ?G
+   %rdf_retractall_triples/4,            % ?S, ?P, ?O, ?G
+    rdf_triple/1,                        % ?Triple
+   %rdf_triple/3,                        % ?S, ?P, ?O
+    rdf_triple/4,                        % ?S, ?P, ?O, ?G
+    rdf_triple_list_member/4,            % ?S, ?P, ?X, ?G
+    rdf_update/4,                        % ?S, ?P, ?O, +Action
+    rdf_update/5                         % ?S, ?P, ?O, ?G, +Action
   ]
 ).
 
@@ -55,6 +56,7 @@
    rdf_assert_triple(t),
    rdf_assert_triple(r, r, o),
    rdf_assert_triple(r, r, o, r),
+   rdf_container_membership_property(r),
    rdf_list_member(o, r, r),
    rdf_retract_graph(r),
    rdf_retractall_triples(r, r, o, r),
@@ -155,6 +157,19 @@ xsd_date_time_term_(date_time(_,_,_,_,_,_,_)).
 xsd_date_time_term_(month_day(_,_)).
 xsd_date_time_term_(time(_,_,_)).
 xsd_date_time_term_(year_month(_,_)).
+
+
+
+%! rdf_container_membership_property(+P:atom) is semidet.
+%! rdf_container_membership_property(-P:atom) is nondet.
+
+rdf_container_membership_property(P) :-
+  rdf_equal(rdf:'_', Prefix),
+  rdf_predicate(P),
+  string_concat(Prefix, NumS, P),
+  number_string(N, NumS),
+  integer(N),
+  N >= 0.
 
 
 
