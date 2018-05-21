@@ -1,8 +1,8 @@
 :- module(
   rdf_mem,
   [
-    rdf_assert_triple/2,                 % +L, -BNode
-    rdf_assert_triple/3,                 % +L, -BNode, +G
+    rdf_assert_list/2,                   % +L, -BNode
+    rdf_assert_list/3,                   % +L, -BNode, +G
     rdf_assert_list_triple/3,            % +S, +P, +L
     rdf_assert_list_triple/4,            % +S, +P, +L, +G
     rdf_assert_triple/1,                 % +Triple
@@ -108,7 +108,7 @@ rdf_assert_list_([H|T], L2, G) :-
 %! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list) is det.
 %! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list, +G:rdf_graph) is det.
 
-rdf_assert_list_triple(S, P, L, G) :-
+rdf_assert_list_triple(S, P, L) :-
   rdf_default_graph(G),
   rdf_assert_list_triple(S, P, L, G).
 
