@@ -1,6 +1,10 @@
 :- module(
   rdf_mem,
   [
+    rdf_assert_triple/2,                 % +L, -BNode
+    rdf_assert_triple/3,                 % +L, -BNode, +G
+    rdf_assert_list_triple/3,            % +S, +P, +L
+    rdf_assert_list_triple/4,            % +S, +P, +L, +G
     rdf_assert_triple/1,                 % +Triple
     rdf_assert_triple/3,                 % +S, +P, +O
     rdf_assert_triple/4,                 % +S, +P, +O, +G
@@ -53,6 +57,10 @@
     rdf_mem:rdf_assert_object_hook/2.
 
 :- rdf_meta
+   rdf_assert_list(t, -),
+   rdf_assert_list(t, -, r),
+   rdf_assert_list_triple(r, r, t),
+   rdf_assert_list_triple(r, r, t, r),
    rdf_assert_triple(t),
    rdf_assert_triple(r, r, o),
    rdf_assert_triple(r, r, o, r),
@@ -67,6 +75,47 @@
    rdf_update(r, r, o, r, t).
 
 
+
+
+
+%! rdf_assert_list(+L:list, -BNode:bnode) is det.
+%! rdf_assert_list(+L:list, -BNode:bnode, +G:rdf_graph) is det.
+
+rdf_assert_list(L, BNode) :-
+  rdf_default_graph(G),
+  rdf_assert_list(L, BNode, G).
+
+
+rdf_assert_list(L, BNode, G) :-
+  must_be(list, L),
+  rdf_transaction(rdf_assert_list_(L, BNode, G)).
+
+rdf_assert_list_([], Nil, _) :-
+  rdf_equal(rdf:nil, Nil).
+rdf_assert_list_([H|T], L2, G) :-
+  (var(L2) -> rdf_create_bnode(L2) ; true),
+  rdf_assert(L2, rdf:type, rdf:'List', G),
+  rdf_assert(L2, rdf:first, H, G),
+  (   T == []
+  ->  rdf_assert(L2, rdf:rest, rdf:nil, G)
+  ;   rdf_create_bnode(T2),
+      rdf_assert(L2, rdf:rest, T2, G),
+      rdf_assert_list_(T, T2, G)
+  ).
+
+
+
+%! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list) is det.
+%! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list, +G:rdf_graph) is det.
+
+rdf_assert_list_triple(S, P, L, G) :-
+  rdf_default_graph(G),
+  rdf_assert_list_triple(S, P, L, G).
+
+
+rdf_assert_list_triple(S, P, L, G) :-
+  rdf_assert_list(L, BNode, G),
+  rdf_assert_triple(S, P, BNode, G).
 
 
 
