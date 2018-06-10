@@ -40,7 +40,7 @@ Multifile hooks do not work (workaround: module prefix).
    rdf_triple_wkt(r, ?, r).
 
 rdf_mem:rdf_assert_object_hook(Shape, literal(type(D,Lex))) :-
-  is_wkt_shape(Shape), !,
+  wkt_is_shape(Shape), !,
   atom_phrase(wkt_generate(Shape), Lex),
   rdf_equal(D, geo:wktLiteral).
 
@@ -84,4 +84,4 @@ pre_object_(Shape, Lex) :-
 post_object_(Shape, _) :-
   ground(Shape), !.
 post_object_(Shape, Lex) :-
-  atom_phrase(wkt_parse(Shape), Lex).
+  wkt_shape_atom(Shape, Lex).
