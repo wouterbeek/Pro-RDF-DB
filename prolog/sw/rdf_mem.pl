@@ -13,6 +13,8 @@
     rdf_load_file/1,                     % +File
     rdf_load_file/2,                     % +File, +Options
    %rdf_predicate/1,                     % ?P
+    rdf_save/1,                          % +File
+    rdf_save/2,                          % +File, +Options
    %rdf_retract_graph/1,                 % ?G
    %rdf_retractall_triples/4,            % ?S, ?P, ?O, ?G
     rdf_triple/1,                        % ?Triple
@@ -31,6 +33,7 @@
 */
 
 :- use_module(library(error)).
+:- use_module(library(option)).
 :- reexport(library(semweb/rdf_db), [
      rdf/3 as rdf_triple,
      rdf_retractall/4 as rdf_retractall_triples,
@@ -47,6 +50,7 @@
 :- use_module(library(zlib)).
 
 :- use_module(library(file_ext)).
+:- use_module(library(sw/rdf_export)).
 :- use_module(library(sw/rdf_media_type)).
 :- use_module(library(sw/rdf_term)).
 
@@ -262,6 +266,40 @@ rdf_media_type_format_(media(text/html,[]), rdfa).
 rdf_media_type_format_(media(application/trig,[]), trig).
 rdf_media_type_format_(media(text/turtle,[]), turtle).
 rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
+
+
+
+%! rdf_save(+File:atom) is det.
+%! rdf_save(+File:atom, +Options:list(compound)) is det.
+%
+% If the file name ends in `.gz', result will be compressed using GNU
+% zip.
+%
+% The following options are defined:
+%
+%   * format(+oneof([quads,triples]))
+%
+%     Whether or not graph names are exported.  The default value is
+%     `quads'.
+
+rdf_save(File) :-
+  rdf_save(File, []).
+
+
+rdf_save(File, Options) :-
+  option(format(Format), Options, quads),
+  call_stream_file(File, write, rdf_save_stream(Format)).
+
+rdf_save_stream(quads, Out) :- !,
+  forall(
+    rdf_triple(S, P, O, G),
+    rdf_write_quad(Out, S, P, O, G)
+  ).
+rdf_save_stream(triples, Out) :-
+  forall(
+    rdf_triple(S, P, O),
+    rdf_write_triple(Out, S, P, O)
+  ).
 
 
 
