@@ -109,8 +109,8 @@ rdf_assert_list_([H|T], L2, G) :-
 
 
 
-%! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list) is det.
-%! rdf_assert_list_triple(+S:rdf_subject, +P:rdf_predicate, +L:list, +G:rdf_graph) is det.
+%! rdf_assert_list_triple(+S:rdf_nonliteral, +P:iri, +L:list) is det.
+%! rdf_assert_list_triple(+S:rdf_nonliteral, +P:iri, +L:list, +G:rdf_graph) is det.
 
 rdf_assert_list_triple(S, P, L) :-
   rdf_default_graph(G),
@@ -124,8 +124,8 @@ rdf_assert_list_triple(S, P, L, G) :-
 
 
 %! rdf_assert_triple(+Triple:rdf_triple) is det.
-%! rdf_assert_triple(+S:rdf_subject, +P:rdf_prefix, +O:rdf_object) is det.
-%! rdf_assert_triple(+S:rdf_subject, +P:rdf_prefix, +O:rdf_object, +G:rdf_graph) is det.
+%! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term) is det.
+%! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term, +G:rdf_graph) is det.
 
 rdf_assert_triple(rdf(S,P,O)) :-
   rdf_assert_triple(S, P, O).
@@ -226,7 +226,7 @@ rdf_container_membership_property(P) :-
 
 
 
-%! rdf_list_member(?X:rdf_term, ?L:rdf_list, ?G:rdf_graph) is nondet.
+%! rdf_list_member(?X:rdf_nonliteral, ?L:rdf_list, ?G:rdf_graph) is nondet.
 
 rdf_list_member(X, L, G) :-
   rdf_triple(L, rdf:first, X, G).
@@ -310,7 +310,7 @@ rdf_triple(rdf(S,P,O)) :-
 
 
 
-%! rdf_triple(?S:rdf_subject, ?P:rdf_predicat, ?O:rdf_object, ?G:rdf_graph) is nondet.
+%! rdf_triple(?S:rdf_nonliteral, ?P:rdf_predicat, ?O:rdf_term, ?G:rdf_graph) is nondet.
 
 rdf_triple(S, P, O, G) :-
   pre_graph_(G, G0),
@@ -330,7 +330,7 @@ post_graph_(G, G).
 
 
 
-%! rdf_triple_list_member(?S:rdf_subject, ?P:rdf_predicate, ?X:rdf_term, ?G:rdf_graph) is nondet.
+%! rdf_triple_list_member(?S:rdf_nonliteral, ?P:iri, ?X:rdf_term, ?G:rdf_graph) is nondet.
 
 rdf_triple_list_member(S, P, X, G) :-
   ground(X), !,
@@ -350,9 +350,9 @@ rdf_triple_list_member(S, P, X, G) :-
 %   * datatype(iri)
 %   * graph(iri)
 %   * language_tag(atom)
-%   * object(rdf_object)
-%   * predicate(rdf_predicate)
-%   * subject(rdf_subject)
+%   * object(rdf_term)
+%   * predicate(iri)
+%   * subject(rdf_nonliteral)
 
 rdf_update(S, P, O, Action) :-
   rdf_update(S, P, O, _, Action).
