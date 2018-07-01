@@ -319,13 +319,17 @@ rdf_triple(S, P, O, G) :-
 
 pre_graph_(G, _) :-
   var(G), !.
+pre_graph_(G, _) :-
+  rdf_default_graph(G), !.
 pre_graph_(G, G) :-
   atom(G), !.
 pre_graph_(G, _) :-
   type_error(rdf_graph, G).
 
 post_graph_(G, G0:_) :- !,
-  G = G0.
+  post_graph_(G, G0).
+post_graph_(G, user) :- !,
+  rdf_default_graph(G).
 post_graph_(G, G).
 
 
