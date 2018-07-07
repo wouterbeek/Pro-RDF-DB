@@ -1,5 +1,5 @@
-home('https://github.com/wouterbeek/Pro-RDF-DB').
-keywords(['RDF','Resource Description Framework','Semantic Web']).
-name('Pro-RDF-DB').
-title('Prolog-based in-memory RDF DB').
+home('https://github.com/wouterbeek/prolog_rdf_db').
+keywords(['Linked Data','RDF','Semantic Web']).
+name(prolog_rdf_db).
+title('Prolog-based in-memory RDF database.').
 version('0.0.0').

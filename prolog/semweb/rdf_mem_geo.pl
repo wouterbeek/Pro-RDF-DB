@@ -21,9 +21,9 @@ Multifile hooks do not work (workaround: module prefix).
 
 :- use_module(library(dcg)).
 :- use_module(library(gis/wkt)).
-:- use_module(library(sw/rdf_mem)).
-:- use_module(library(sw/rdf_prefix)).
-:- use_module(library(sw/rdf_term)).
+:- use_module(library(semweb/rdf_mem)).
+:- use_module(library(semweb/rdf_prefix)).
+:- use_module(library(semweb/rdf_term)).
 
 :- dynamic
     rdf_mem:rdf_assert_object_hook/2.

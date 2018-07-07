@@ -50,9 +50,10 @@
 :- use_module(library(zlib)).
 
 :- use_module(library(file_ext)).
-:- use_module(library(sw/rdf_export)).
-:- use_module(library(sw/rdf_media_type)).
-:- use_module(library(sw/rdf_term)).
+:- use_module(library(semweb/rdf_export)).
+:- use_module(library(semweb/rdf_media_type)).
+:- use_module(library(semweb/rdf_prefix)).
+:- use_module(library(semweb/rdf_term)).
 
 :- dynamic
     rdf_mem:rdf_assert_object_hook/2.
