@@ -37,6 +37,7 @@
 :- reexport(library(semweb/rdf_db), [
      rdf/3 as rdf_triple,
      rdf_retractall/4 as rdf_retractall_triples,
+     rdf_transaction/1,
      rdf_unload_graph/1 as rdf_retract_graph
    ]).
 :- reexport(library(semweb/rdf11), [
@@ -99,12 +100,12 @@ rdf_assert_list_([], Nil, _) :-
   rdf_equal(rdf:nil, Nil).
 rdf_assert_list_([H|T], L2, G) :-
   (var(L2) -> rdf_create_bnode(L2) ; true),
-  rdf_assert(L2, rdf:type, rdf:'List', G),
-  rdf_assert(L2, rdf:first, H, G),
+  rdf_assert_triple(L2, rdf:type, rdf:'List', G),
+  rdf_assert_triple(L2, rdf:first, H, G),
   (   T == []
-  ->  rdf_assert(L2, rdf:rest, rdf:nil, G)
+  ->  rdf_assert_triple(L2, rdf:rest, rdf:nil, G)
   ;   rdf_create_bnode(T2),
-      rdf_assert(L2, rdf:rest, T2, G),
+      rdf_assert_triple(L2, rdf:rest, T2, G),
       rdf_assert_list_(T, T2, G)
   ).
 
