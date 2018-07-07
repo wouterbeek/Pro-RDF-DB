@@ -1,0 +1,6 @@
+{
+  "dependencies": [
+    {"user": "wouterbeek", "repo": "Pro-RDF", "version": "v1.0.0"}
+  ],
+  "keywords": ["Linked Data", "RDF", "Semantic Web"]
+}
