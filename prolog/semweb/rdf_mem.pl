@@ -5,7 +5,7 @@
     rdf_assert_list/3,                   % +L, -BNode, +G
     rdf_assert_list_triple/3,            % +S, +P, +L
     rdf_assert_list_triple/4,            % +S, +P, +L, +G
-    rdf_assert_triple/1,                 % +Triple
+    rdf_assert_triple/1,                 % +Tuple
     rdf_assert_triple/3,                 % +S, +P, +O
     rdf_assert_triple/4,                 % +S, +P, +O, +G
     rdf_container_membership_property/1, % ?P
@@ -99,12 +99,12 @@ rdf_assert_list(L, BNode, G) :-
 rdf_assert_list_([], Nil, _) :-
   rdf_equal(rdf:nil, Nil).
 rdf_assert_list_([H|T], L2, G) :-
-  (var(L2) -> rdf_create_bnode(L2) ; true),
+  (var(L2) -> rdf_bnode_iri(L2) ; true),
   rdf_assert_triple(L2, rdf:type, rdf:'List', G),
   rdf_assert_triple(L2, rdf:first, H, G),
   (   T == []
   ->  rdf_assert_triple(L2, rdf:rest, rdf:nil, G)
-  ;   rdf_create_bnode(T2),
+  ;   rdf_bnode_iri(T2),
       rdf_assert_triple(L2, rdf:rest, T2, G),
       rdf_assert_list_(T, T2, G)
   ).
@@ -125,17 +125,42 @@ rdf_assert_list_triple(S, P, L, G) :-
 
 
 
-%! rdf_assert_triple(+Triple:rdf_triple) is det.
+%! rdf_assert_triple(+Tuple:rdf_tuple) is det.
 %! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term) is det.
 %! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term, +G:rdf_graph) is det.
+%
+% @arg O The following additional input formats are supported:
+%
+%      | *Input format*              | *Datatype IRI*         |
+%      |-----------------------------+------------------------|
+%      | pair(string,atom)           | rdf:langString         |
+%      | date(Y,Mo,D)                | xsd:date               |
+%      | date_time(Y,Mo,D,H,Mi,S)    | xsd:dateTime           |
+%      | date_time(Y,Mo,D,H,Mi,S,TZ) | xsd:dateTime           |
+%      | month_day(Mo,D)             | xsd:gMonthDay          |
+%      | time(H,Mi,S)                | xsd:time               |
+%      | year_month(Y,Mo)            | xsd:gYearMonth         |
+%      | nonneg(N)                   | xsd:nonNegativeInteger |
+%      | positive_integer(N)         | xsd:positiveInteger    |
+%      | str(atom)                   | xsd:string             |
+%      | uri(Uri)                    | xsd:anyURI             |
+%      | year(Y)                     | xsd:gYear              |
+%      | integer                     | xsd:integer            |
+%      | float                       | xsd:double             |
+%      | string                      | xsd:string             |
+%      | literal(lang(D,Lex))        | rdf:langString         |
+%      | literal(type(D,Lex))        | D                      |
+%      | oneof([false,true])         | xsd:boolean            |
 
-rdf_assert_triple(rdf(S,P,O)) :-
+rdf_assert_triple(rdf(S,P,O)) :- !,
   rdf_assert_triple(S, P, O).
+rdf_assert_triple(rdf(S,P,O,G)) :-
+  rdf_assert_triple(S, P, O, G).
 
 
-rdf_assert_triple(S, P, O1) :-
-  rdf_assert_object_(O1, O2),
-  rdf_db:rdf_assert(S, P, O2).
+rdf_assert_triple(S, P, O) :-
+  rdf_default_graph(G),
+  rdf_assert_triple(S, P, O, G).
 
 
 rdf_assert_triple(S, P, O1, G) :-

@@ -1,5 +1,5 @@
 #+author: Wouter Beek
-#+title: ~Pro-RDF-DB~
+#+title: Pro-RDF-DB
 
 This library provides a Prolog-based in-memory RDF database with high
 performance.  This backend can be accessed through the
