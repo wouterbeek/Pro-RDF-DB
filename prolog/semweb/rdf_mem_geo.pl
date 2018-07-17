@@ -31,7 +31,7 @@ Multifile hooks do not work (workaround: module prefix).
 :- multifile
     rdf_mem:rdf_assert_object_hook/2.
 
-:- maplist(rdf_assert_prefix, [geo,rdf]).
+:- maplist(rdf_register_prefix, [geo,rdf]).
 
 :- rdf_meta
    rdf_assert_wkt(r, +, r),
