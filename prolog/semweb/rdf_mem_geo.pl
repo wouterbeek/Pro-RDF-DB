@@ -26,10 +26,10 @@ Multifile hooks do not work (workaround: module prefix).
 :- use_module(library(semweb/rdf_term)).
 
 :- dynamic
-    rdf_mem:rdf_assert_object_hook/2.
+    rdf_create_literal_hook/2.
 
 :- multifile
-    rdf_mem:rdf_assert_object_hook/2.
+    rdf_create_literal_hook/2.
 
 :- maplist(rdf_register_prefix, [geo,rdf]).
 
@@ -39,7 +39,7 @@ Multifile hooks do not work (workaround: module prefix).
    rdf_triple_wkt(r, ?),
    rdf_triple_wkt(r, ?, r).
 
-rdf_mem:rdf_assert_object_hook(Shape, literal(type(D,Lex))) :-
+rdf_create_literal_hook(Shape, literal(type(D,Lex))) :-
   wkt_is_shape(Shape), !,
   atom_phrase(wkt_generate(Shape), Lex),
   rdf_equal(D, geo:wktLiteral).

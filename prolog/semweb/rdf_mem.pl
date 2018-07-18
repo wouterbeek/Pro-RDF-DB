@@ -56,12 +56,6 @@
 :- use_module(library(semweb/rdf_prefix)).
 :- use_module(library(semweb/rdf_term)).
 
-:- dynamic
-    rdf_mem:rdf_assert_object_hook/2.
-
-:- multifile
-    rdf_mem:rdf_assert_object_hook/2.
-
 :- rdf_meta
    rdf_assert_list(t, -),
    rdf_assert_list(t, -, r),
@@ -128,29 +122,6 @@ rdf_assert_list_triple(S, P, L, G) :-
 %! rdf_assert_triple(+Tuple:rdf_tuple) is det.
 %! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term) is det.
 %! rdf_assert_triple(+S:rdf_nonliteral, +P:rdf_prefix, +O:rdf_term, +G:rdf_graph) is det.
-%
-% @arg O The following additional input formats are supported:
-%
-%      | *Input format*              | *Datatype IRI*         |
-%      |-----------------------------+------------------------|
-%      | pair(string,atom)           | rdf:langString         |
-%      | date(Y,Mo,D)                | xsd:date               |
-%      | date_time(Y,Mo,D,H,Mi,S)    | xsd:dateTime           |
-%      | date_time(Y,Mo,D,H,Mi,S,TZ) | xsd:dateTime           |
-%      | month_day(Mo,D)             | xsd:gMonthDay          |
-%      | time(H,Mi,S)                | xsd:time               |
-%      | year_month(Y,Mo)            | xsd:gYearMonth         |
-%      | nonneg(N)                   | xsd:nonNegativeInteger |
-%      | positive_integer(N)         | xsd:positiveInteger    |
-%      | str(atom)                   | xsd:string             |
-%      | uri(Uri)                    | xsd:anyURI             |
-%      | year(Y)                     | xsd:gYear              |
-%      | integer                     | xsd:integer            |
-%      | float                       | xsd:double             |
-%      | string                      | xsd:string             |
-%      | literal(lang(D,Lex))        | rdf:langString         |
-%      | literal(type(D,Lex))        | D                      |
-%      | oneof([false,true])         | xsd:boolean            |
 
 rdf_assert_triple(rdf(S,P,O)) :- !,
   rdf_assert_triple(S, P, O).
@@ -163,80 +134,9 @@ rdf_assert_triple(S, P, O) :-
   rdf_assert_triple(S, P, O, G).
 
 
-rdf_assert_triple(S, P, O1, G) :-
-  rdf_assert_object_(O1, O2),
-  rdf_db:rdf_assert(S, P, O2, G).
-
-rdf_assert_object_(Term, _) :-
-  var(Term), !,
-  instantiation_error(Term).
-% hook
-rdf_assert_object_(Term, O) :-
-  rdf_mem:rdf_assert_object_hook(Term, O), !.
-% language-tagged string
-rdf_assert_object_(String-LTag, literal(lang(LTag,Lex))) :- !,
-  atom_string(Lex, String).
-% @tbd Support a more convenient/uniform date/time input format.
-% date/3, date_time/[6.7], month_day/2, time/3, year_month/2
-rdf_assert_object_(Compound, literal(type(D,Lex))) :-
-  xsd_date_time_term_(Compound), !,
-  xsd_time_string(Compound, D, String),
-  atom_string(Lex, String).
-% nonneg/1 → xsd:nonNegativeInteger
-rdf_assert_object_(nonneg(N), literal(type(D,Lex))) :- !,
-  rdf_equal(D, xsd:nonNegativeInteger),
-  must_be(nonneg, N),
-  xsd_number_string(N, Lex).
-% positive_integer/1 → xsd:positiveInteger
-rdf_assert_object_(positive_integer(N), literal(type(D,Lex))) :- !,
-  rdf_equal(D, xsd:positiveInteger),
-  must_be(positive_integer, N),
-  xsd_number_string(N, Lex).
-% str/1 → xsd:string
-rdf_assert_object_(str(Atomic), literal(type(D,Lex))) :- !,
-  atom_string(Atomic, String),
-  rdf_equal(D, xsd:string),
-  atom_string(Lex, String).
-% uri/1 → xsd:anyURI
-rdf_assert_object_(uri(Uri), literal(type(D,Uri))) :- !,
-  rdf_equal(xsd:anyURI, D).
-% year/1 → xsd:gYear
-rdf_assert_object_(year(Year), literal(type(D,Lex))) :- !,
-  rdf_equal(D, xsd:gYear),
-  atom_number(Lex, Year).
-% integer → xsd:integer
-rdf_assert_object_(Value, literal(type(D,Lex))) :-
-  integer(Value), !,
-  rdf_equal(D, xsd:integer),
-  atom_number(Lex, Value).
-% float → xsd:double
-rdf_assert_object_(Value, literal(type(D,Lex))) :-
-  float(Value), !,
-  rdf_equal(D, xsd:double),
-  xsd_number_string(Value, String),
-  atom_string(Lex, String).
-% string → xsd:string
-rdf_assert_object_(Value, literal(type(D,Lex))) :-
-  string(Value), !,
-  rdf_equal(D, xsd:string),
-  atom_string(Lex, Value).
-% regular typed literal
-rdf_assert_object_(literal(type(D,Lex)), literal(type(D,Lex))) :- !.
-% regular language-tagged string
-rdf_assert_object_(literal(lang(LTag,Lex)), literal(lang(LTag,Lex))) :- !.
-% atom `false' and `true' → xsd:boolean
-rdf_assert_object_(Lex, literal(type(D,Lex))) :-
-  memberchk(Lex, [false,true]), !,
-  rdf_equal(D, xsd:boolean).
-% blank node, IRI
-rdf_assert_object_(O, O).
-
-xsd_date_time_term_(date(_,_,_)).
-xsd_date_time_term_(date_time(_,_,_,_,_,_)).
-xsd_date_time_term_(date_time(_,_,_,_,_,_,_)).
-xsd_date_time_term_(month_day(_,_)).
-xsd_date_time_term_(time(_,_,_)).
-xsd_date_time_term_(year_month(_,_)).
+rdf_assert_triple(S, P, O0, G) :-
+  rdf_create_term(O0, O),
+  rdf_db:rdf_assert(S, P, O, G).
 
 
 
