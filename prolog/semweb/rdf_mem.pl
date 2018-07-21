@@ -199,8 +199,8 @@ rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
 %! rdf_save(+File:atom) is det.
 %! rdf_save(+File:atom, +Options:list(compound)) is det.
 %
-% If the file name ends in `.gz', result will be compressed using GNU
-% zip.
+% If the file name ends in `.gz', contents will be compressed using
+% GNU zip.
 %
 % The following options are defined:
 %
