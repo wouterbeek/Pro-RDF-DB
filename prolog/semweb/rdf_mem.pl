@@ -13,10 +13,11 @@
     rdf_load_file/1,                     % +File
     rdf_load_file/2,                     % +File, +Options
    %rdf_predicate/1,                     % ?P
-    rdf_save/1,                          % +File
-    rdf_save/2,                          % +File, +Options
+   %rdf_reset_db/0,
    %rdf_retract_graph/1,                 % ?G
    %rdf_retractall_triples/4,            % ?S, ?P, ?O, ?G
+    rdf_save/1,                          % +File
+    rdf_save/2,                          % +File, +Options
     rdf_triple/1,                        % ?Triple
    %rdf_triple/3,                        % ?S, ?P, ?O
     rdf_triple/4,                        % ?S, ?P, ?O, ?G
@@ -36,6 +37,7 @@
 :- use_module(library(option)).
 :- reexport(library(semweb/rdf_db), [
      rdf/3 as rdf_triple,
+     rdf_reset_db/0,
      rdf_retractall/4 as rdf_retractall_triples,
      rdf_transaction/1,
      rdf_unload_graph/1 as rdf_retract_graph

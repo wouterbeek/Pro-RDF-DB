@@ -1,5 +1,5 @@
 :- module(
-  rdf_mem_geo,
+  rdf_mem_gis,
   [
     rdf_assert_wkt/3, % +Feature, +Shape, +G
     rdf_assert_wkt/4, % +Feature, +Shape, +G, -Geometry
@@ -8,7 +8,7 @@
   ]
 ).
 
-/** <module> RDF Geography Plugin
+/** <module> RDF GIS Support
 
 Prefix notation does not work in hooks (workaround: datatype
 match in body).
@@ -20,7 +20,10 @@ Multifile hooks do not work (workaround: module prefix).
 */
 
 :- use_module(library(dcg)).
+:- use_module(library(gis/gis)).
 :- use_module(library(gis/wkt)).
+:- use_module(library(gis/wkt_generate)).
+:- use_module(library(gis/wkt_parser)).
 :- use_module(library(semweb/rdf_mem)).
 :- use_module(library(semweb/rdf_prefix)).
 :- use_module(library(semweb/rdf_term)).
@@ -40,7 +43,7 @@ Multifile hooks do not work (workaround: module prefix).
    rdf_triple_wkt(r, ?, r).
 
 rdf_create_literal_hook(Shape, literal(type(D,Lex))) :-
-  wkt_is_shape(Shape), !,
+  gis_is_shape(Shape), !,
   atom_phrase(wkt_generate(Shape), Lex),
   rdf_equal(D, geo:wktLiteral).
 
@@ -79,7 +82,7 @@ rdf_triple_wkt(Feature, Shape, G) :-
 pre_object_(Shape, _) :-
   var(Shape), !.
 pre_object_(Shape, Lex) :-
-  atom_prase(wkt_generate(Shape), Lex).
+  atom_phrase(wkt_generate(Shape), Lex).
 
 post_object_(Shape, _) :-
   ground(Shape), !.
