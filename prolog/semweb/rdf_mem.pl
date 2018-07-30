@@ -9,6 +9,7 @@
     rdf_assert_triple/3,                 % +S, +P, +O
     rdf_assert_triple/4,                 % +S, +P, +O, +G
     rdf_container_membership_property/1, % ?P
+   %rdf_graph/1,                         % ?G
     rdf_list_member/3,                   % ?X, ?L, ?G
     rdf_load_file/1,                     % +File
     rdf_load_file/2,                     % +File, +Options
@@ -16,8 +17,9 @@
    %rdf_reset_db/0,
    %rdf_retract_graph/1,                 % ?G
    %rdf_retractall_triples/4,            % ?S, ?P, ?O, ?G
-    rdf_save/1,                          % +File
-    rdf_save/2,                          % +File, +Options
+    rdf_save_file/1,                     % +File
+    rdf_save_file/2,                     % +File, +Options
+   %rdf_transaction/1,                   % :Goal_0
     rdf_triple/1,                        % ?Triple
    %rdf_triple/3,                        % ?S, ?P, ?O
     rdf_triple/4,                        % ?S, ?P, ?O, ?G
@@ -37,6 +39,7 @@
 :- use_module(library(option)).
 :- reexport(library(semweb/rdf_db), [
      rdf/3 as rdf_triple,
+     rdf_graph/1,
      rdf_reset_db/0,
      rdf_retractall/4 as rdf_retractall_triples,
      rdf_transaction/1,
@@ -53,10 +56,12 @@
 :- use_module(library(zlib)).
 
 :- use_module(library(file_ext)).
+:- use_module(library(media_type)).
 :- use_module(library(semweb/rdf_export)).
 :- use_module(library(semweb/rdf_media_type)).
 :- use_module(library(semweb/rdf_prefix)).
 :- use_module(library(semweb/rdf_term)).
+:- use_module(library(semweb/turtle)).
 
 :- rdf_meta
    rdf_assert_list(t, -),
@@ -198,37 +203,82 @@ rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
 
 
 
-%! rdf_save(+File:atom) is det.
-%! rdf_save(+File:atom, +Options:list(compound)) is det.
+%! rdf_save_file(+File:atom) is det.
+%! rdf_save_file(+File:atom, +Options:list(compound)) is det.
 %
 % If the file name ends in `.gz', contents will be compressed using
 % GNU zip.
 %
 % The following options are defined:
 %
-%   * format(+oneof([quads,triples]))
+%   * media_type(+compound)
 %
-%     Whether or not graph names are exported.  The default value is
-%     `quads'.
+%     The default value is `media(application/'n-quads',[])'.
 
-rdf_save(File) :-
-  rdf_save(File, []).
+rdf_save_file(File) :-
+  rdf_file_name_media_type(File, MediaType),
+  rdf_save_file(File, [media_type(MediaType)]).
 
 
-rdf_save(File, Options) :-
-  option(format(Format), Options, quads),
-  call_stream_file(File, write, rdf_save_stream(Format)).
+rdf_save_file(File, Options) :-
+  call_stream_file(File, write, [Out]/{Options}>>rdf_save_stream(Out, Options)).
 
-rdf_save_stream(quads, Out) :- !,
+
+
+
+%! rdf_save_stream(+Out:blob) is det.
+%! rdf_save_stream(+Out:blob, +Options:list(compound)) is det.
+
+
+rdf_save_stream(Out, Options1) :-
+  select_option(media_type(MediaType), Options1, Options2, media(application/'n-quads',[])),
+  media_type_encoding(MediaType, Encoding),
+  rdf_save_stream_(Out, MediaType, Encoding, Options2).
+
+% application/n-quads
+rdf_save_stream_(Out, media(application/'n-quads',_), _, _) :- !,
   forall(
     rdf_triple(S, P, O, G),
     rdf_write_quad(Out, S, P, O, G)
   ).
-rdf_save_stream(triples, Out) :-
+% application/n-triples
+rdf_save_stream_(Out, media(application/'n-triples',_), _, _) :- !,
   forall(
     rdf_triple(S, P, O),
     rdf_write_triple(Out, S, P, O)
   ).
+% application/rdf+xml
+rdf_save_stream_(Out, media(application/'rdf+xml',_), Encoding, Options1) :- !,
+  must_be(oneof([iso_latin_1,utf8]), Encoding),
+  merge_options([encoding(Encoding)], Options1, Options2),
+  rdf_save_stream(Out, Options2).
+% application/trig
+rdf_save_stream_(Out, media(application/trig,_), _, _) :- !,
+  forall(
+    rdf_graph(G),
+    (
+      trig_open_graph_(Out, G),
+      forall(
+        rdf_triple(S, P, O, G),
+        rdf_write_triple(Out, S, P, O)
+      ),
+      trig_close_graph_(Out, G)
+    )
+  ).
+% text/turtle
+rdf_save_stream_(Out, media(text/turtle,_), _, Options) :-
+  rdf_save_canonical_turtle(Out, Options).
+
+trig_open_graph_(_, G) :-
+  rdf_default_graph(G), !.
+trig_open_graph_(Out, G) :-
+  rdf_write_iri(Out, G),
+  format(Out, " {\n", []).
+
+trig_close_graph_(_, G) :-
+  rdf_default_graph(G), !.
+rdf_close_graph_(Out, _) :-
+  format(Out, "}\n", []).
 
 
 
