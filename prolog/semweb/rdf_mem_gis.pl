@@ -23,7 +23,7 @@ Multifile hooks do not work (workaround: module prefix).
 :- use_module(library(gis/gis)).
 :- use_module(library(gis/wkt)).
 :- use_module(library(gis/wkt_generate)).
-:- use_module(library(gis/wkt_parser)).
+:- use_module(library(gis/wkt_parse)).
 :- use_module(library(semweb/rdf_mem)).
 :- use_module(library(semweb/rdf_prefix)).
 :- use_module(library(semweb/rdf_term)).
