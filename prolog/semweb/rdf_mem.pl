@@ -10,7 +10,6 @@
     rdf_assert_triple/4,                 % +S, +P, +O, +G
     rdf_container_membership_property/1, % ?P
    %rdf_graph/1,                         % ?G
-    rdf_list_member/3,                   % ?X, ?L, ?G
     rdf_load_file/1,                     % +File
     rdf_load_file/2,                     % +File, +Options
    %rdf_predicate/1,                     % ?P
@@ -23,7 +22,6 @@
     rdf_triple/1,                        % ?Triple
    %rdf_triple/3,                        % ?S, ?P, ?O
     rdf_triple/4,                        % ?S, ?P, ?O, ?G
-    rdf_triple_list_member/4,            % ?S, ?P, ?X, ?G
     rdf_update/4,                        % ?S, ?P, ?O, +Action
     rdf_update/5                         % ?S, ?P, ?O, ?G, +Action
   ]
@@ -64,15 +62,15 @@
 :- use_module(library(semweb/turtle)).
 
 :- multifile
+    rdf_api:assert_triple_/4,
     rdf_api:triple_/4,
-    rdf_api:triple_assert_/4,
     rdf_api:triple_count_/5.
+
+rdf_api:assert_triple_(mem(G), S, P, O) :-
+  rdf_assert_triple(S, P, O, G).
 
 rdf_api:triple_(mem(G), S, P, O) :-
   rdf_triple(S, P, O, G).
-
-rdf_api:triple_assert_(mem(G), S, P, O) :-
-  rdf_assert_triple(S, P, O, G).
 
 rdf_api:triple_count_(mem(G), S, P, O, N) :-
   aggregate_all(count, rdf_triple(S, P, O, G), N).
@@ -86,12 +84,10 @@ rdf_api:triple_count_(mem(G), S, P, O, N) :-
    rdf_assert_triple(r, r, o),
    rdf_assert_triple(r, r, o, r),
    rdf_container_membership_property(r),
-   rdf_list_member(o, r, r),
    rdf_retract_graph(r),
    rdf_retractall_triples(r, r, o, r),
    rdf_triple(t),
    rdf_triple(r, r, o, r),
-   rdf_triple_list_member(r, r, o, r),
    rdf_update(r, r, o, t),
    rdf_update(r, r, o, r, t).
 
@@ -171,16 +167,6 @@ rdf_container_membership_property(P) :-
   number_string(N, NumS),
   integer(N),
   N >= 0.
-
-
-
-%! rdf_list_member(?X:rdf_nonliteral, ?L:rdf_list, ?G:rdf_graph) is nondet.
-
-rdf_list_member(X, L, G) :-
-  rdf_triple(L, rdf:first, X, G).
-rdf_list_member(X, L, G) :-
-  rdf_triple(L, rdf:rest, T, G),
-  rdf_list_member(X, T, G).
 
 
 
@@ -324,18 +310,6 @@ post_graph_(G, G0:_) :- !,
 post_graph_(G, user) :- !,
   rdf_default_graph(G).
 post_graph_(G, G).
-
-
-
-%! rdf_triple_list_member(?S:rdf_nonliteral, ?P:iri, ?X:rdf_term, ?G:rdf_graph) is nondet.
-
-rdf_triple_list_member(S, P, X, G) :-
-  ground(X), !,
-  rdf_list_member(X, L, G),
-  rdf_triple(S, P, L, G).
-rdf_triple_list_member(S, P, X, G) :-
-  rdf_triple(S, P, L, G),
-  rdf_list_member(X, L, G).
 
 
 
