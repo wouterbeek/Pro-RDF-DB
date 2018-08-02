@@ -63,6 +63,16 @@
 :- use_module(library(semweb/rdf_term)).
 :- use_module(library(semweb/turtle)).
 
+:- multifile
+    rdf_api:triple_/4.
+    rdf_api:triple_count_/5.
+
+rdf_api:triple_(mem(G), S, P, O) :-
+  rdf_triple(S, P, O, G).
+
+rdf_api:triple_count_(mem(G), S, P, O, N) :-
+  aggregate_all(count, rdf_triple(S, P, O, G), N).
+
 :- rdf_meta
    rdf_assert_list(t, -),
    rdf_assert_list(t, -, r),
