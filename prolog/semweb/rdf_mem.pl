@@ -192,7 +192,7 @@ rdf_load_file(File) :-
 
 rdf_load_file(File, Options) :-
   rdf_file_name_media_type(File, MediaType),
-  call_stream_file(
+  read_from_file(
     File,
     {MediaType,Options}/[In]>>rdf_load_stream(In, MediaType, Options)
   ).
@@ -231,7 +231,7 @@ rdf_save_file(File) :-
 
 
 rdf_save_file(File, Options) :-
-  call_stream_file(File, write, [Out]/{Options}>>rdf_save_stream(Out, Options)).
+  write_to_file(File, [Out]/{Options}>>rdf_save_stream(Out, Options)).
 
 
 
