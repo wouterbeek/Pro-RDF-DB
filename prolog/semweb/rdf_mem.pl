@@ -221,7 +221,7 @@ rdf_save_file(File) :-
 
 
 rdf_save_file(File, Options) :-
-  write_to_file(File, [Out]/{Options}>>rdf_save_stream(Out, Options)).
+  write_to_file(File, {Options}/[Out]>>rdf_save_stream(Out, Options)).
 
 
 
