@@ -15,6 +15,7 @@
    %rdf_predicate/1,                     % ?P
    %rdf_reset_db/0,
    %rdf_retract_graph/1,                 % ?G
+   %rdf_retractall_triples/3,            % ?S, ?P, ?O
    %rdf_retractall_triples/4,            % ?S, ?P, ?O, ?G
     rdf_save_file/1,                     % +File
     rdf_save_file/2,                     % +File, +Options
@@ -39,6 +40,7 @@
      rdf/3 as rdf_triple,
      rdf_graph/1,
      rdf_reset_db/0,
+     rdf_retractall/3 as rdf_retractall_triples,
      rdf_retractall/4 as rdf_retractall_triples,
      rdf_transaction/1,
      rdf_unload_graph/1 as rdf_retract_graph
@@ -85,8 +87,10 @@ rdf_api:triple_count_(mem(G), S, P, O, N) :-
    rdf_assert_triple(r, r, o, r),
    rdf_container_membership_property(r),
    rdf_retract_graph(r),
+   rdf_retractall_triples(r, r, o),
    rdf_retractall_triples(r, r, o, r),
    rdf_triple(t),
+   rdf_triple(r, r, o),
    rdf_triple(r, r, o, r),
    rdf_update(r, r, o, t),
    rdf_update(r, r, o, r, t).
