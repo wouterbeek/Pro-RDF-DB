@@ -52,6 +52,7 @@
 :- use_module(library(semweb/rdfa), []).
 :- use_module(library(semweb/turtle), []).
 :- use_module(library(sgml)).
+:- use_module(library(uri)).
 :- use_module(library(yall)).
 :- use_module(library(zlib)).
 
@@ -184,16 +185,34 @@ rdf_load_file(File) :-
   rdf_load_file(File, []).
 
 
-rdf_load_file(File, Options) :-
+rdf_load_file(File, Options1) :-
   rdf_file_name_media_type(File, MediaType),
+  set_graph_option(Options1, File, Options2),
   read_from_file(
     File,
-    {MediaType,Options}/[In]>>rdf_load_stream(In, MediaType, Options)
+    {MediaType,Options2}/[In]>>rdf_load_stream(In, MediaType, Options2)
   ).
+
+set_graph_option(Options, File, Options) :-
+  option(graph(G), Options),
+  (   var(G)
+  ->  % Return the graph name that is based on the file name.
+      uri_file_name(G, File)
+  ;   % Use the set graph name.
+      true
+  ).
+% Add the graph/1 option, setting the graph name based on the file
+% name.
+set_graph_option(Options1, File, Options2) :-
+  uri_file_name(G, File),
+  merge_options([graph(G)], Options1, Options2).
 
 rdf_load_stream(In, MediaType, Options1) :-
   rdf_media_type_format_(MediaType, Format), !,
-  merge_options([anon_prefix('_:'),format(Format)], Options1, Options2),
+  % Blank nodes must be manually assigned a unique enough prefix.
+  uuid(Prefix1),
+  atom_concat('_:', Prefix1, Prefix2),
+  merge_options([anon_prefix(Prefix2),format(Format)], Options1, Options2),
   rdf_db:rdf_load(In, Options2).
 rdf_load_stream(_, MediaType, _) :-
   existence_error(rdf_media_type, MediaType).
