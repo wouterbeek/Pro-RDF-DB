@@ -19,20 +19,13 @@ Multifile hooks do not work (workaround: module prefix).
 @version 2017-2018
 */
 
-:- use_module(library(dcg)).
+:- use_module(library(apply)).
+
 :- use_module(library(gis/gis)).
 :- use_module(library(gis/wkt)).
-:- use_module(library(gis/wkt_generate)).
-:- use_module(library(gis/wkt_parse)).
 :- use_module(library(semweb/rdf_mem)).
 :- use_module(library(semweb/rdf_prefix)).
 :- use_module(library(semweb/rdf_term)).
-
-:- dynamic
-    rdf_create_literal_hook/2.
-
-:- multifile
-    rdf_create_literal_hook/2.
 
 :- maplist(rdf_register_prefix, [geo,rdf]).
 
@@ -41,11 +34,6 @@ Multifile hooks do not work (workaround: module prefix).
    rdf_assert_wkt(r, +, r, -),
    rdf_triple_wkt(r, ?),
    rdf_triple_wkt(r, ?, r).
-
-rdf_create_literal_hook(Shape, literal(type(D,Lex))) :-
-  gis_is_shape(Shape), !,
-  atom_phrase(wkt_generate(Shape), Lex),
-  rdf_equal(D, geo:wktLiteral).
 
 
 
@@ -61,7 +49,8 @@ rdf_assert_wkt(Feature, Shape, G) :-
 rdf_assert_wkt(Feature, Shape, G, Geometry) :-
   rdf_bnode_iri(Geometry),
   rdf_assert_triple(Feature, geo:hasGeometry, Geometry, G),
-  rdf_assert_triple(Geometry, geo:asWKT, Shape, G),
+  wkt_shape_atom(Shape, Lex),
+  rdf_assert_triple(Geometry, geo:asWKT, literal(type(geo:wktLiteral,Lex)), G),
   rdf_assert_triple(Geometry, rdf:type, geo:'Geometry', G).
 
 
@@ -75,16 +64,16 @@ rdf_triple_wkt(Feature, Shape) :-
 
 rdf_triple_wkt(Feature, Shape, G) :-
   rdf_triple(Feature, geo:hasGeometry, BNode, G),
-  pre_object_(Shape, Lex),
+  pre_shape_(Shape, Lex),
   rdf_triple(BNode, geo:asWKT, literal(type(geo:wktLiteral,Lex)), G),
-  post_object_(Shape, Lex).
+  post_shape_(Shape, Lex).
 
-pre_object_(Shape, _) :-
+pre_shape_(Shape, _) :-
   var(Shape), !.
-pre_object_(Shape, Lex) :-
-  atom_phrase(wkt_generate(Shape), Lex).
+pre_shape_(Shape, Lex) :-
+  wkt_shape_atom(Shape, Lex).
 
-post_object_(Shape, _) :-
+post_shape_(Shape, _) :-
   ground(Shape), !.
-post_object_(Shape, Lex) :-
+post_shape_(Shape, Lex) :-
   wkt_shape_atom(Shape, Lex).
