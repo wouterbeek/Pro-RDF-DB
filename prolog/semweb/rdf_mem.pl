@@ -184,6 +184,11 @@ rdf_container_membership_property(P) :-
 %
 % Loads RDF from a local file.  The format is determined based on the
 % file extension of File.
+%
+% If graph/1 is not specified as part of Options, the file URI of File
+% is used as the default graph name.
+%
+% Ensures that blank nodes receive a unique prefix.
 
 rdf_load_file(File) :-
   rdf_load_file(File, []).
