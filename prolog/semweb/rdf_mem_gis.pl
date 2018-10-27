@@ -50,7 +50,8 @@ rdf_assert_wkt(Feature, Shape, G, Geometry) :-
   rdf_bnode_iri(Geometry),
   rdf_assert_triple(Feature, geo:hasGeometry, Geometry, G),
   wkt_shape_atom(Shape, Lex),
-  rdf_assert_triple(Geometry, geo:asWKT, literal(type(geo:wktLiteral,Lex)), G),
+  rdf_typed_literal(geo:wktLiteral, Lex, Literal),
+  rdf_assert_triple(Geometry, geo:asWKT, Literal, G),
   rdf_assert_triple(Geometry, rdf:type, geo:'Geometry', G).
 
 
@@ -65,7 +66,8 @@ rdf_triple_wkt(Feature, Shape) :-
 rdf_triple_wkt(Feature, Shape, G) :-
   rdf_triple(Feature, geo:hasGeometry, BNode, G),
   pre_shape_(Shape, Lex),
-  rdf_triple(BNode, geo:asWKT, literal(type(geo:wktLiteral,Lex)), G),
+  rdf_typed_literal(geo:wktLiteral, Lex, Literal),
+  rdf_triple(BNode, geo:asWKT, Literal, G),
   post_shape_(Shape, Lex).
 
 pre_shape_(Shape, _) :-
