@@ -23,6 +23,8 @@
     rdf_triple/1,                        % ?Triple
    %rdf_triple/3,                        % ?S, ?P, ?O
     rdf_triple/4,                        % ?S, ?P, ?O, ?G
+    rdf_triple_value/3,                  % ?S, ?P, -Value
+    rdf_triple_value/4,                  % ?S, ?P, -Value, ?G
     rdf_update/4,                        % ?S, ?P, ?O, +Action
     rdf_update/5                         % ?S, ?P, ?O, ?G, +Action
   ]
@@ -93,6 +95,8 @@ rdf_api:triple_count_(mem(G), S, P, O, N) :-
    rdf_triple(t),
    rdf_triple(r, r, o),
    rdf_triple(r, r, o, r),
+   rdf_triple_value(r, r, -),
+   rdf_triple_value(r, r, -, r),
    rdf_update(r, r, o, t),
    rdf_update(r, r, o, r, t).
 
@@ -333,6 +337,20 @@ post_graph_(G, G0:_) :- !,
 post_graph_(G, user) :- !,
   rdf_default_graph(G).
 post_graph_(G, G).
+
+
+
+%! rdf_triple_value(?S:rdf_nonliteral, ?P:rdf_prediate, -Value) is nondet.
+%! rdf_triple_value(?S:rdf_nonliteral, ?P:rdf_prediate, -Value, ?G:rdf_graph) is nondet.
+
+rdf_triple_value(S, P, Value) :-
+  rdf_triple(S, P, O),
+  rdf_literal_value(O, Value).
+
+
+rdf_triple_value(S, P, Value, G) :-
+  rdf_triple(S, P, O, G),
+  rdf_literal_value(O, Value).
 
 
 
