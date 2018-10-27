@@ -321,7 +321,7 @@ rdf_triple(rdf(S,P,O)) :-
 
 
 
-%! rdf_triple(?S:rdf_nonliteral, ?P:rdf_predicat, ?O:rdf_term, ?G:rdf_graph) is nondet.
+%! rdf_triple(?S:rdf_nonliteral, ?P:rdf_predicate, ?O:rdf_term, ?G:rdf_graph) is nondet.
 
 rdf_triple(S, P, O, G) :-
   pre_graph_(G, G0),
