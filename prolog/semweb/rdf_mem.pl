@@ -5,6 +5,8 @@
     rdf_assert_list/3,                   % +L, -BNode, +G
     rdf_assert_list_triple/3,            % +S, +P, +L
     rdf_assert_list_triple/4,            % +S, +P, +L, +G
+    rdf_assert_shape/3,                  % +S, +Shape, +G
+    rdf_assert_shape/4,                  % +S, +Shape, +G, -Geometry
     rdf_assert_triple/1,                 % +Tuple
     rdf_assert_triple/3,                 % +S, +P, +O
     rdf_assert_triple/4,                 % +S, +P, +O, +G
@@ -13,6 +15,7 @@
     rdf_load_file/1,                     % +File
     rdf_load_file/2,                     % +File, +Options
    %rdf_predicate/1,                     % ?P
+    rdf_read_prefixes/2,                 % +File, -PrefixMap
    %rdf_reset_db/0,
    %rdf_retract_graph/1,                 % ?G
    %rdf_retractall_triples/3,            % ?S, ?P, ?O
@@ -36,6 +39,7 @@
 @version 2017-2018
 */
 
+:- use_module(library(apply)).
 :- use_module(library(error)).
 :- use_module(library(option)).
 :- reexport(library(semweb/rdf_db), [
@@ -66,6 +70,8 @@
 :- use_module(library(semweb/rdf_term)).
 :- use_module(library(semweb/turtle)).
 
+:- maplist(rdf_register_prefix, [geo,rdf]).
+
 :- multifile
     rdf_api:assert_triple_/4,
     rdf_api:triple_/4,
@@ -85,6 +91,8 @@ rdf_api:triple_count_(mem(G), S, P, O, N) :-
    rdf_assert_list(t, -, r),
    rdf_assert_list_triple(r, r, t),
    rdf_assert_list_triple(r, r, t, r),
+   rdf_assert_shape(r, +, r),
+   rdf_assert_shape(r, +, r, -),
    rdf_assert_triple(t),
    rdf_assert_triple(r, r, o),
    rdf_assert_triple(r, r, o, r),
@@ -142,6 +150,21 @@ rdf_assert_list_triple(S, P, L) :-
 rdf_assert_list_triple(S, P, L, G) :-
   rdf_assert_list(L, BNode, G),
   rdf_assert_triple(S, P, BNode, G).
+
+
+
+%! rdf_assert_shape(+Feature:rdf_term, +Shape:compound, +G:rdf_graph) is det.
+%! rdf_assert_shape(+Feature:rdf_term, +Shape:compound, +G:rdf_graph, -Geometry:iri) is det.
+
+rdf_assert_shape(Feature, Shape, G) :-
+  rdf_assert_shape(Feature, Shape, G, _).
+
+
+rdf_assert_shape(Feature, Shape, G, Geometry) :-
+  rdf_bnode_iri(Geometry),
+  rdf_assert_triple(Feature, geo:hasGeometry, Geometry, G),
+  rdf_assert_triple(Geometry, rdf:type, geo:'Geometry', G),
+  rdf_assert_triple(Geometry, geo:asWKT, Shape, G).
 
 
 
@@ -232,6 +255,19 @@ rdf_media_type_format_(media(text/html,[]), rdfa).
 rdf_media_type_format_(media(application/trig,[]), trig).
 rdf_media_type_format_(media(text/turtle,[]), turtle).
 rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
+
+
+
+%! rdf_read_prefixes(+File:atom, -Map:assoc) is det.
+
+rdf_read_prefixes(File, Map) :-
+  read_from_file(File, rdf_read_prefixes_stream(Map)).
+
+rdf_read_prefixes_stream(Map, In) :-
+  turtle:rdf_read_turtle(In, _, [prefixes(Pairs1)]),
+  maplist(writeln, Pairs1),
+  transpose_pairs(Pairs1, Pairs2),
+  list_to_assoc(Pairs2, Map).
 
 
 
