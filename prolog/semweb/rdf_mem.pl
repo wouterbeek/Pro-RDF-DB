@@ -265,7 +265,6 @@ rdf_read_prefixes(File, Map) :-
 
 rdf_read_prefixes_stream(Map, In) :-
   turtle:rdf_read_turtle(In, _, [prefixes(Pairs1)]),
-  maplist(writeln, Pairs1),
   transpose_pairs(Pairs1, Pairs2),
   list_to_assoc(Pairs2, Map).
 
@@ -305,16 +304,10 @@ rdf_save_stream(Out, Options1) :-
 
 % application/n-quads
 rdf_save_stream_(Out, media(application/'n-quads',_), _, _) :- !,
-  forall(
-    rdf_triple(S, P, O, G),
-    rdf_write_quad(Out, S, P, O, G)
-  ).
+  rdf_write_quads(Out).
 % application/n-triples
 rdf_save_stream_(Out, media(application/'n-triples',_), _, _) :- !,
-  forall(
-    rdf_triple(S, P, O),
-    rdf_write_triple(Out, S, P, O)
-  ).
+  rdf_write_triples(Out).
 % application/rdf+xml
 rdf_save_stream_(Out, media(application/'rdf+xml',_), Encoding, Options1) :- !,
   must_be(oneof([iso_latin_1,utf8]), Encoding),
@@ -326,10 +319,7 @@ rdf_save_stream_(Out, media(application/trig,_), _, _) :- !,
     rdf_graph(G),
     (
       trig_open_graph_(Out, G),
-      forall(
-        rdf_triple(S, P, O, G),
-        rdf_write_triple(Out, S, P, O)
-      ),
+      rdf_write_triples(Out, G),
       trig_close_graph_(Out, G)
     )
   ).
