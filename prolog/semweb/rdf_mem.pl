@@ -296,6 +296,9 @@ rdf_save_file(File, Options) :-
 %! rdf_save_stream(+Out:blob) is det.
 %! rdf_save_stream(+Out:blob, +Options:list(compound)) is det.
 
+rdf_save_stream(Out) :-
+  rdf_save_stream(Out, []).
+
 
 rdf_save_stream(Out, Options1) :-
   select_option(media_type(MediaType), Options1, Options2, media(application/'n-quads',[])),
@@ -304,22 +307,32 @@ rdf_save_stream(Out, Options1) :-
 
 % application/n-quads
 rdf_save_stream_(Out, media(application/'n-quads',_), _, _) :- !,
-  rdf_write_quads(Out).
+  forall(
+    rdf_triple(S, P, O, G),
+    rdf_write_quad(Out, S, P, O, G)
+  ).
 % application/n-triples
-rdf_save_stream_(Out, media(application/'n-triples',_), _, _) :- !,
-  rdf_write_triples(Out).
+rdf_save_stream_(Out, media(application/'n-triples',_), _, Options) :- !,
+  ignore(option(graph(G), Options)),
+  forall(
+    rdf_triple(S, P, O, G),
+    rdf_write_triple(Out, S, P, O)
+  ).
 % application/rdf+xml
 rdf_save_stream_(Out, media(application/'rdf+xml',_), Encoding, Options1) :- !,
   must_be(oneof([iso_latin_1,utf8]), Encoding),
   merge_options([encoding(Encoding)], Options1, Options2),
-  rdf_save_stream(Out, Options2).
+  rdf_db:rdf_save(Out, Options2).
 % application/trig
 rdf_save_stream_(Out, media(application/trig,_), _, _) :- !,
   forall(
     rdf_graph(G),
     (
       trig_open_graph_(Out, G),
-      rdf_write_triples(Out, G),
+      forall(
+        rdf_triple(S, P, O),
+        rdf_write_triple(Out, S, P, O)
+      ),
       trig_close_graph_(Out, G)
     )
   ).
