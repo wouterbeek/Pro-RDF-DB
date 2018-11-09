@@ -74,11 +74,15 @@
 
 :- multifile
     rdf_api:assert_triple_/4,
+    rdf_api:retractall_triples_/4,
     rdf_api:triple_/4,
     rdf_api:triple_count_/5.
 
 rdf_api:assert_triple_(mem(G), S, P, O) :-
   rdf_assert_triple(S, P, O, G).
+
+rdf_api:retractall_triples_(mem(G), S, P, O) :-
+  rdf_retractall_triples(S, P, O, G).
 
 rdf_api:triple_(mem(G), S, P, O) :-
   rdf_triple(S, P, O, G).
@@ -183,8 +187,7 @@ rdf_assert_triple(S, P, O) :-
   rdf_assert_triple(S, P, O, G).
 
 
-rdf_assert_triple(S, P, O0, G) :-
-  rdf_create_term(O0, O),
+rdf_assert_triple(S, P, O, G) :-
   rdf_db:rdf_assert(S, P, O, G).
 
 
