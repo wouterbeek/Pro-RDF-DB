@@ -205,8 +205,8 @@ rdf_container_membership_property(P) :-
 
 
 
-%! rdf_load_file(+File:atom) is det.
-%! rdf_load_file(+File:atom, +Options:list(compound)) is det.
+%! rdf_load_file(+File) is det.
+%! rdf_load_file(+File, +Options:list(compound)) is det.
 %
 % Loads RDF from a local file.  The format is determined based on the
 % file extension of File.
@@ -216,11 +216,12 @@ rdf_container_membership_property(P) :-
 %
 % Ensures that blank nodes receive a unique prefix.
 
-rdf_load_file(File) :-
-  rdf_load_file(File, []).
+rdf_load_file(Spec) :-
+  rdf_load_file(Spec, []).
 
 
-rdf_load_file(File, Options1) :-
+rdf_load_file(Spec, Options1) :-
+  absolute_file_name(Spec, File, [access(read)]),
   rdf_file_name_media_type(File, MediaType),
   set_graph_option(Options1, File, Options2),
   read_from_file(
