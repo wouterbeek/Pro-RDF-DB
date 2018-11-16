@@ -122,7 +122,7 @@ rdf_load_file(Spec, Options1) :-
   ).
 
 set_graph_option_(Options, File, Options) :-
-  option(graph(G), Options),
+  option(graph(G), Options), !,
   (   var(G)
   ->  % Return the graph name that is based on the file name.
       uri_file_name(G, File)
