@@ -136,7 +136,7 @@ set_graph_option_(Options1, File, Options2) :-
   merge_options([graph(G)], Options1, Options2).
 
 rdf_load_stream_(In, MediaType, Options1) :-
-  rdf_media_type_format_(MediaType, Format), !,
+  rdf_media_type_format(MediaType, Format), !,
   % Blank nodes must be manually assigned a unique enough prefix.
   uuid(Prefix1),
   atom_concat('_:', Prefix1, Prefix2),
@@ -144,13 +144,6 @@ rdf_load_stream_(In, MediaType, Options1) :-
   rdf_db:rdf_load(In, Options2).
 rdf_load_stream_(_, MediaType, _) :-
   existence_error(rdf_media_type, MediaType).
-
-rdf_media_type_format_(media(application/'n-quads',[]), nquads).
-rdf_media_type_format_(media(application/'n-triples',[]), ntriples).
-rdf_media_type_format_(media(text/html,[]), rdfa).
-rdf_media_type_format_(media(application/trig,[]), trig).
-rdf_media_type_format_(media(text/turtle,[]), turtle).
-rdf_media_type_format_(media(application/'rdf+xml',[]), xml).
 
 
 
