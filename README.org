@@ -1,12 +1,16 @@
-#+author: Wouter Beek
-#+title: Pro-RDF-DB
+#+TITLE: prolog_rdf_db
+#+AUTHOR: Wouter Beek
 
 This library provides a Prolog-based in-memory RDF database with high
 performance.  This backend can be accessed through the
-backend-agnostic [[https://github.com/wouterbeek/Pro-RDF][Pro-RDF]] library.
+backend-agnostic ~[[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]]~ library.
 
 * Installation
 
   1. Install [[http://www.swi-prolog.org][SWI-Prolog]].
-  2. Install [[https://github.com/wouterbeek/ppm][Prolog Package Manager]].
-  3. Run the following goal: ~ppm_install(wouterbeek, 'Pro-RDF-DB').~
+  2. Install the ~[[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]]~ library, including its dependencies.
+  3. Add the following line to your ~.swiplrc~ file:
+
+#+BEGIN_SRC prolog
+user:file_search_path(library, '/your/path/to/prolog_rdf_db').
+#+END_SRC
