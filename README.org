@@ -3,12 +3,12 @@
 
 This library provides a Prolog-based in-memory RDF database with high
 performance.  This backend can be accessed through the
-backend-agnostic ~[[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]]~ library.
+backend-agnostic [[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]] library.
 
 * Installation
 
   1. Install [[http://www.swi-prolog.org][SWI-Prolog]].
-  2. Install the ~[[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]]~ library, including its dependencies.
+  2. Install the [[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]] library, including its dependencies.
   3. Add the following line to your ~.swiplrc~ file:
 
 #+BEGIN_SRC prolog
