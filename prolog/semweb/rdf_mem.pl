@@ -50,6 +50,7 @@
 
 :- multifile
     rdf_api:assert_triple_/4,
+    rdf_api:named_graph_/2,
     rdf_api:predicate_/2,
     rdf_api:tp_/4,
     rdf_api:tp_count_/5,
@@ -57,6 +58,9 @@
 
 rdf_api:assert_triple_(mem(G), S, P, O) :-
   rdf_db:rdf_assert(S, P, O, G).
+
+rdf_api:named_graph_(mem(G), G) :-
+  rdf_graph(G).
 
 rdf_api:predicate_(mem(G), P) :-
   rdf11:rdf_predicate(P),
