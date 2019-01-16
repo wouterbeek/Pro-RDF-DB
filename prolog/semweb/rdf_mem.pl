@@ -230,18 +230,19 @@ rdf_save_stream_(Out, media(application/'rdf+xml',_), Encoding, Options1) :- !,
 rdf_save_stream_(Out, media(application/trig,_), _, _) :- !,
   forall(
     rdf_graph(G),
-    (
-      trig_open_graph_(Out, G),
-      forall(
-        rdf_db:rdf(S, P, O),
-        rdf_write_triple(Out, S, P, O)
-      ),
-      trig_close_graph_(Out, G)
-    )
+    trig_graph_(Out, G)
   ).
 % text/turtle
 rdf_save_stream_(Out, media(text/turtle,_), _, Options) :-
   rdf_save_canonical_turtle(Out, Options).
+
+trig_graph_(Out, G) :-
+  trig_open_graph_(Out, G),
+  forall(
+    rdf_db:rdf(S, P, O, G),
+    rdf_write_triple(Out, S, P, O)
+  ),
+  trig_close_graph_(Out, G).
 
 trig_open_graph_(_, G) :-
   rdf_default_graph(G), !.
@@ -251,5 +252,5 @@ trig_open_graph_(Out, G) :-
 
 trig_close_graph_(_, G) :-
   rdf_default_graph(G), !.
-rdf_close_graph_(Out, _) :-
+trig_close_graph_(Out, _) :-
   format(Out, "}\n", []).
