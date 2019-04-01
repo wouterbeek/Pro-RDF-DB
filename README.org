@@ -7,12 +7,18 @@ backend-agnostic [[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]] librar
 
 * Installation
 
-  1. Install [[http://www.swi-prolog.org][SWI-Prolog]].
+1. Install [[http://www.swi-prolog.org][SWI-Prolog]].
 
-  2. Install the [[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]] library, including its dependencies.
+2. Install the [[https://github.com/wouterbeek/prolog_rdf][prolog_rdf]] library, including its dependencies.
 
-  3. Add the following line to your ~.swiplrc~ file:
+3. Clone this library:
 
-     #+BEGIN_SRC prolog
-     user:file_search_path(library, '/your/path/to/prolog_rdf_db').
-     #+END_SRC
+   #+begin_src sh
+   git clone https://github.com/wouterbeek/prolog_rdf
+   #+end_src
+
+3. Add the following line to your ~.swiplrc~ file:
+
+   #+begin_src prolog
+   user:file_search_path(library, '/your/path/to/prolog_rdf_db').
+   #+end_src
